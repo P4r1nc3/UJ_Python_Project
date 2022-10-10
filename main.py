@@ -1,7 +1,9 @@
 import tkinter.messagebox
 from tkinter import *
 from tkinter import ttk
+import pymysql
 import sys
+
 
 class DatabaseConnector:
 
@@ -23,6 +25,11 @@ class DatabaseConnector:
             self.entryPremiere.delete(0, END)
             self.entryLength.delete(0, END)
             self.boxGenre.set(" ")
+
+        def addData():
+            sqlConnection = pymysql.connect(host="localhost", user="root", password="toor", database="test")
+            sqlConnection.commit()
+            sqlConnection.close()
 
 
         # ========================= Frames =========================
