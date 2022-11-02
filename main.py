@@ -4,142 +4,289 @@ from tkinter import ttk
 import pymysql
 import sys
 
+# ========================= Enter Your Password for root User =========================
+pswd = "admin12345"
 
-class DatabaseConnector:
+# ========================= General =========================
+root = Tk()
+root.title("Car Database")
+root.resizable(width=False, height=False)
 
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Movie Database")
-        self.root.resizable(width=False, height=False)
+# ========================= Variables =========================
+carMake = StringVar()
+carModel = StringVar()
+carColour = StringVar()
+carYear = StringVar()
+carType = StringVar()
 
-        # ======================== Commands ========================
-        def exit():
-            EXIT = tkinter.messagebox.askyesno("Movie Database", "Are You sure You want to exit?")
-            if EXIT > 0:
-                root.destroy
-                sys.exit(0)
+# ========================= Frames =========================
+# Main Frame
+MainFrame = Frame(root, bd=20, width=1000, height=1000, relief=RIDGE, bg='black')
+MainFrame.grid()
 
-        def reset():
-            self.entryMovieName.delete(0, END)
-            self.entryDirector.delete(0, END)
-            self.entryPremiere.delete(0, END)
-            self.entryLength.delete(0, END)
-            self.boxGenre.set(" ")
+# Left Frame
+LeftFrame = Frame(MainFrame, bd=5, relief=RIDGE)
+LeftFrame.pack(side=LEFT)
 
-        def addData():
-            sqlConnection = pymysql.connect(host="localhost", user="root", password="toor", database="test")
+LeftFrame0 = Frame(LeftFrame, bd=5, relief=RIDGE)
+LeftFrame0.pack(side=TOP, pady=0, padx=0)
+
+# Right Frame
+RightFrame = Frame(MainFrame, bd=5, relief=RIDGE)
+RightFrame.pack(side=RIGHT)
+
+# ========================= Labels & Entry =========================
+# Car Make
+lblCarMake = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Make", bd=8)
+lblCarMake.grid(row=0, column=0, sticky=W, padx=50)
+
+entryCarMake = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left',
+                     textvariable=carMake)
+entryCarMake.grid(row=0, column=1, sticky=W, padx=50)
+
+# Car Model
+lblCarModel = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Model", bd=8)
+lblCarModel.grid(row=1, column=0, sticky=W, padx=50)
+
+entryCarModel = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left',
+                     textvariable=carModel)
+entryCarModel.grid(row=1, column=1, sticky=W, padx=50)
+
+# Car Colour
+lblCarColour = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Colour", bd=8)
+lblCarColour.grid(row=2, column=0, sticky=W, padx=50)
+
+entryCarColour = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left',
+                     textvariable=carColour)
+entryCarColour.grid(row=2, column=1, sticky=W, padx=50)
+
+# Car Production Year
+lblProductionYear = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Production Year", bd=8)
+lblProductionYear.grid(row=3, column=0, sticky=W, padx=50)
+
+entryProductionYear = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left',
+                     textvariable=carYear)
+entryProductionYear.grid(row=3, column=1, sticky=W, padx=50)
+
+# Car Body Type
+lblBodyType = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Body Type", bd=8)
+lblBodyType.grid(row=4, column=0, sticky=W, padx=50)
+
+boxBodyType = ttk.Combobox(LeftFrame0, textvariable=carType)
+boxBodyType['values'] = (' ', 'Sedan', 'Coupe', 'Sport Car', 'Station Wagon', 'Hatchback',
+                              'Convertible', 'SUV', 'Minivan', 'Pickup Truck', 'Different')
+boxBodyType.current(0)
+boxBodyType.grid(row=4, column=1, sticky=W, padx=50)
+
+
+# ======================== Commands ========================
+def exit():
+    EXIT = tkinter.messagebox.askyesno("Car Database", "Are You sure You want to exit?")
+    if EXIT > 0:
+        root.destroy
+        sys.exit(0)
+
+def reset():
+    entryCarMake.delete(0, END)
+    entryCarModel.delete(0, END)
+    entryProductionYear.delete(0, END)
+    entryCarColour.delete(0, END)
+    boxBodyType.set(" ")
+
+def addNew():
+    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
+    cur = sqlConnection.cursor()
+
+    Make = carMake.get()
+    Model = carModel.get()
+    Colour = carColour.get()
+    Year = carYear.get()
+    Type = carType.get()
+
+    insert_query = "INSERT INTO car (make, model, colour, year, type) VALUES(%s, %s, %s, %s, %s)"
+    values = (Make, Model, Colour, Year, Type)
+    cur.execute(insert_query, values)
+
+    sqlConnection.commit()
+    display()
+    sqlConnection.close()
+    tkinter.messagebox.showinfo("Car Database", "Record Entered Successfully!")
+
+
+def display():
+    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
+    cur = sqlConnection.cursor()
+    insert_query = "SELECT * FROM car"
+    cur.execute(insert_query)
+    result = cur.fetchall()
+    if len(result) != 0:
+        record.delete(*record.get_children())
+        for row in result:
+            record.insert('', END, values=row)
+        sqlConnection.commit()
+    sqlConnection.close()
+
+def delete():
+    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
+    cur = sqlConnection.cursor()
+
+    viewInfo = record.focus()
+    learnerData = record.item(viewInfo)
+    row = learnerData['values']
+
+    insert_query = "DELETE FROM car WHERE id=%s"
+    cur.execute(insert_query, row[0])
+
+    sqlConnection.commit()
+    display()
+    sqlConnection.close()
+    tkinter.messagebox.showinfo("Car Database", "Record Deleted Successfully!")
+
+def info(event):
+    viewInfo = record.focus()
+    learnerData = record.item(viewInfo)
+    row = learnerData['values']
+    carMake.set(row[1])
+    carModel.set(row[2])
+    carColour.set(row[3])
+    carYear.set(row[4])
+    carType.set(row[5])
+
+def update():
+    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
+    cur = sqlConnection.cursor()
+
+    Make = carMake.get()
+    Model = carModel.get()
+    Colour = carColour.get()
+    Year = carYear.get()
+    Type = carType.get()
+
+    viewInfo = record.focus()
+    learnerData = record.item(viewInfo)
+    row = learnerData['values']
+
+    insert_query = "UPDATE car SET make=%s, model=%s, colour=%s, year=%s, type=%s WHERE id=%s"
+    values = (Make, Model, Colour, Year, Type, row[0])
+    cur.execute(insert_query, values)
+
+    sqlConnection.commit()
+    display()
+    sqlConnection.close()
+    tkinter.messagebox.showinfo("Car Database", "Record Updated Successfully!")
+
+def search():
+    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
+    cur = sqlConnection.cursor()
+
+    Make = carMake.get()
+    Model = carModel.get()
+    Colour = carColour.get()
+    Year = carYear.get()
+    Type = carType.get()
+
+    if Make != '':
+        insert_query = "SELECT * FROM car WHERE make LIKE %s"
+        cur.execute(insert_query, Make)
+        result = cur.fetchall()
+        if len(result) != 0:
+            record.delete(*record.get_children())
+            for row in result:
+                record.insert('', END, values=row)
             sqlConnection.commit()
-            sqlConnection.close()
+    if Model != '':
+        insert_query = "SELECT * FROM car WHERE model LIKE %s"
+        cur.execute(insert_query, Model)
+        result = cur.fetchall()
+        if len(result) != 0:
+            record.delete(*record.get_children())
+            for row in result:
+                record.insert('', END, values=row)
+            sqlConnection.commit()
+    if Colour != '':
+        insert_query = "SELECT * FROM car WHERE colour LIKE %s"
+        cur.execute(insert_query, Colour)
+        result = cur.fetchall()
+        if len(result) != 0:
+            record.delete(*record.get_children())
+            for row in result:
+                record.insert('', END, values=row)
+            sqlConnection.commit()
+    if Year != '':
+        insert_query = "SELECT * FROM car WHERE year LIKE %s"
+        cur.execute(insert_query, Year)
+        result = cur.fetchall()
+        if len(result) != 0:
+            record.delete(*record.get_children())
+            for row in result:
+                record.insert('', END, values=row)
+            sqlConnection.commit()
+    if Type != '':
+        insert_query = "SELECT * FROM car WHERE type LIKE %s"
+        cur.execute(insert_query, Type)
+        result = cur.fetchall()
+        if len(result) != 0:
+            record.delete(*record.get_children())
+            for row in result:
+                record.insert('', END, values=row)
+            sqlConnection.commit()
+    sqlConnection.close()
 
+# ========================= Scrollbar =========================
+scroll_y = Scrollbar(LeftFrame, orient=VERTICAL)
 
-        # ========================= Frames =========================
-        # Main Frame
-        MainFrame = Frame(self.root, bd=20, width=1000, height=1000, relief=RIDGE, bg='black')
-        MainFrame.grid()
+record = ttk.Treeview(LeftFrame, height=10, columns=('id', 'make', 'model', 'colour', 'year', 'type'),
+                           yscrollcommand=scroll_y.set)
+scroll_y.pack(side=RIGHT, fill=Y)
 
-        # Left Frame
-        LeftFrame = Frame(MainFrame, bd=5, relief=RIDGE)
-        LeftFrame.pack(side=LEFT)
+record.heading('id', text='ID')
+record.heading('make', text='Make')
+record.heading('model', text='Model')
+record.heading('colour', text='Colour')
+record.heading('year', text='Production Year')
+record.heading('type', text='Body Type')
 
-        LeftFrame0 = Frame(LeftFrame, bd=5, relief=RIDGE)
-        LeftFrame0.pack(side=TOP, pady=0, padx=0)
+record['show'] = 'headings'
 
-        # Right Frame
-        RightFrame = Frame(MainFrame, bd=5, relief=RIDGE)
-        RightFrame.pack(side=RIGHT)
+record.column('id', width=50)
+record.column('make', width=100)
+record.column('model', width=100)
+record.column('colour', width=100)
+record.column('year', width=100)
+record.column('type', width=100)
 
-        # ========================= Labels & Entry =========================
-        # Movie Name
-        self.lblMovieName = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Movie Title", bd=8)
-        self.lblMovieName.grid(row=0, column=0, sticky=W, padx=50)
+record.pack(fill=BOTH, expand=1)
+record.bind("<ButtonRelease-1>", info)
+display()
+# ========================= Buttons =========================
+btnAddNew = Button(RightFrame, font=('arial', 12, 'bold'), text="Add New",
+                        bd=8, pady=2, padx=20, width=10, height=3, command=addNew)
+btnAddNew.grid(row=0, column=0, padx=5)
 
-        self.entryMovieName = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left')
-        self.entryMovieName.grid(row=0, column=1, sticky=W, padx=50)
+btnDisplay = Button(RightFrame, font=('arial', 12, 'bold'), text="Display",
+                         bd=8, pady=2, padx=20, width=10, height=3, command=display)
+btnDisplay.grid(row=1, column=0, padx=5)
 
-        # Movie Director
-        self.lblDirector = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Movie Director", bd=8)
-        self.lblDirector.grid(row=1, column=0, sticky=W, padx=50)
+btnUpdate = Button(RightFrame, font=('arial', 12, 'bold'), text="Update",
+                        bd=8, pady=2, padx=20, width=10, height=3, command=update)
+btnUpdate.grid(row=2, column=0, padx=5)
 
-        self.entryDirector = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left')
-        self.entryDirector.grid(row=1, column=1, sticky=W, padx=50)
+btnDelete = Button(RightFrame, font=('arial', 12, 'bold'), text="Delete",
+                        bd=8, pady=2, padx=20, width=10, height=3, command=delete)
+btnDelete.grid(row=3, column=0, padx=5)
 
-        # Movie Length
-        self.lblLength = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Movie Length", bd=8)
-        self.lblLength.grid(row=2, column=0, sticky=W, padx=50)
+btnSearch = Button(RightFrame, font=('arial', 12, 'bold'), text="Search",
+                        bd=8, pady=2, padx=20, width=10, height=3, command=search)
+btnSearch.grid(row=4, column=0, padx=5)
 
-        self.entryLength = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left')
-        self.entryLength.grid(row=2, column=1, sticky=W, padx=50)
+btnReset = Button(RightFrame, font=('arial', 12, 'bold'), text="Reset",
+                       bd=8, pady=2, padx=20, width=10, height=3, command=reset)
+btnReset.grid(row=5, column=0, padx=5)
 
-        # Movie Premiere
-        self.lblPremiere = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Movie Premiere", bd=8)
-        self.lblPremiere.grid(row=3, column=0, sticky=W, padx=50)
+btnExit = Button(RightFrame, font=('arial', 12, 'bold'), text="Exit",
+                      bd=8, pady=2, padx=20, width=10, height=3, command=exit)
+btnExit.grid(row=6, column=0, padx=5)
 
-        self.entryPremiere = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left')
-        self.entryPremiere.grid(row=3, column=1, sticky=W, padx=50)
-
-        # Movie Genre
-        self.lblGenre = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Movie Genre", bd=8)
-        self.lblGenre.grid(row=4, column=0, sticky=W, padx=50)
-
-        self.boxGenre = ttk.Combobox(LeftFrame0)
-        self.boxGenre['values'] = (' ', 'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror',
-                                   'Musical', 'Mystery', 'Romance', 'Sci-FI', 'Thriller')
-        self.boxGenre.current(0)
-        self.boxGenre.grid(row=4, column=1, sticky=W, padx=50)
-
-        # ========================= Scrollbar =========================
-        scroll_y = Scrollbar(LeftFrame, orient=VERTICAL)
-
-        self.record = ttk.Treeview(LeftFrame, height=10, columns=('name', 'director', 'length', 'premiere', 'genre'),
-                                   yscrollcommand=scroll_y.set)
-        scroll_y.pack(side=RIGHT, fill=Y)
-
-        self.record.heading('name', text='Movie Name')
-        self.record.heading('director', text='Movie Director')
-        self.record.heading('length', text='Movie Length')
-        self.record.heading('premiere', text='Movie Premiere')
-        self.record.heading('genre', text='Movie Genre')
-
-        self.record['show'] = 'headings'
-
-        self.record.column('name', width=100)
-        self.record.column('director', width=100)
-        self.record.column('length', width=100)
-        self.record.column('premiere', width=100)
-        self.record.column('genre', width=100)
-
-        self.record.pack(fill=BOTH, expand=1)
-
-        # ========================= Buttons =========================
-        self.btnAddNew = Button(RightFrame, font=('arial', 12, 'bold'), text="Add New",
-                                bd=8, pady=2, padx=20, width=10, height=3)
-        self.btnAddNew.grid(row=0, column=0, padx=5)
-
-        self.btnDisplay = Button(RightFrame, font=('arial', 12, 'bold'), text="Display",
-                                 bd=8, pady=2, padx=20, width=10, height=3)
-        self.btnDisplay.grid(row=1, column=0, padx=5)
-
-        self.btnUpdate = Button(RightFrame, font=('arial', 12, 'bold'), text="Update",
-                                bd=8, pady=2, padx=20, width=10, height=3)
-        self.btnUpdate.grid(row=2, column=0, padx=5)
-
-        self.btnDelete = Button(RightFrame, font=('arial', 12, 'bold'), text="Delete",
-                                bd=8, pady=2, padx=20, width=10, height=3)
-        self.btnDelete.grid(row=3, column=0, padx=5)
-
-        self.btnSearch = Button(RightFrame, font=('arial', 12, 'bold'), text="Search",
-                                bd=8, pady=2, padx=20, width=10, height=3)
-        self.btnSearch.grid(row=4, column=0, padx=5)
-
-        self.btnReset = Button(RightFrame, font=('arial', 12, 'bold'), text="Reset",
-                               bd=8, pady=2, padx=20, width=10, height=3, command=reset)
-        self.btnReset.grid(row=5, column=0, padx=5)
-
-        self.btnExit = Button(RightFrame, font=('arial', 12, 'bold'), text="Exit",
-                              bd=8, pady=2, padx=20, width=10, height=3, command=exit)
-        self.btnExit.grid(row=6, column=0, padx=5)
 
 if __name__ == '__main__':
-    root = Tk()
-    application = DatabaseConnector(root)
     root.mainloop()
