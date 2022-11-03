@@ -1,5 +1,46 @@
 #Program pomocniczy, który pomagal w testowaniu glownego programu
+import random
 import pymysql
+
+def generateCar():
+    # ===== Choosing random make from a list =====
+    makeList = ['Bmw', 'Audi', 'Mercedes', 'Renault', 'Volkswagen', 'Nissan']
+    make = random.choice(makeList)
+
+    # ===== Choosing random model for proper make =====
+    modelBmw = ['Series 1', 'Series 2', 'Series 3', 'Series 4', 'Series 5', 'Series 6', 'E46']
+    modelAudi = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'TT', 'E-tron', 'R8', 'Q3', 'Q5', 'Q7']
+    modelMercedes = ['GTR', 'A class', 'B class', 'C class', 'E class', 'S class', 'G class']
+    modelRenault = ['Clio', 'Captur', 'Kadjar', 'Zoe', 'Arkana', 'Megane', 'Koleos', 'Express']
+    modelVolkswagen = ['Passat', 'Golf', 'Tiguan', 'Up', 'Polo', 'T-cross', 'Touran', 'Arteon']
+    modelNissan = ['Micra', 'Juke', 'Quasqai', 'GTR', 'Leaf', 'Navara', 'Ariya', 'X-trail']
+    model = ''
+
+    if make == 'Bmw':
+        model = random.choice(modelBmw)
+    elif make == 'Audi':
+        model = random.choice(modelAudi)
+    elif make == 'Mercedes':
+        model = random.choice(modelMercedes)
+    elif make == 'Renault':
+        model = random.choice(modelRenault)
+    elif make == 'Volkswagen':
+        model = random.choice(modelVolkswagen)
+    elif make == 'Nissan':
+        model = random.choice(modelNissan)
+    # ====== Colour ======
+    colourList = ['White', 'Black', 'Blue', 'Red', 'Purple', 'Grey', 'Orange', 'Green']
+    colour = random.choice(colourList)
+
+    # ===== Year =====
+    year = random.randint(2000, 2022)
+
+    # ===== Type =====
+    typeList = ['Sedan', 'Coupe', 'Sport Car', 'Station Wagon', 'Hatchback',
+            'Convertible', 'SUV', 'Minivan', 'Pickup Truck', 'Different']
+    type = random.choice(typeList)
+
+    return make, model, colour, year, type
 
 def createDataBase(x):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=x)
@@ -18,13 +59,8 @@ def createTable(x):
 def insertRecords(x):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=x, database="carDataBase")
     cursor = sqlConnection.cursor()
-    cursor.execute('insert into car (make, model, colour, year, type) values("Audi", "A8", "White", "2020", "Coupe")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("Ford", "Ranger Raptor", "Blue", "2018", "Pickup Truck")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("BMW", "Series 1", "Black", "2012", "Hatchback")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("Renault", "Clio", "Red", "2016", "Hatchback")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("Ferrari", "Enzo", "Red", "2002", "Sport Car")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("Volkswagen", "Passat", "Black", "2010", "Sedan")')
-    cursor.execute('insert into car (make, model, colour, year, type) values("Nissan", "Juke", "Grey", "2022", "SUV")')
+    for i in range(0, 10):
+        cursor.execute('insert into car (make, model, colour, year, type) values' + str(generateCar()))
     sqlConnection.commit()
     sqlConnection.close()
 
