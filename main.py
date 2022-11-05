@@ -185,45 +185,42 @@ def search():
     Year = carYear.get()
     Type = carType.get()
 
-    if Make != '':
-        insert_query = "SELECT * FROM car WHERE make LIKE %s"
-        cur.execute(insert_query, Make)
-        result = cur.fetchall()
-        if len(result) != 0:
-            record.delete(*record.get_children())
-            for row in result:
-                record.insert('', END, values=row)
-            sqlConnection.commit()
-    if Model != '':
-        insert_query = "SELECT * FROM car WHERE model LIKE %s"
-        cur.execute(insert_query, Model)
-        result = cur.fetchall()
-        if len(result) != 0:
-            record.delete(*record.get_children())
-            for row in result:
-                record.insert('', END, values=row)
-            sqlConnection.commit()
-    if Colour != '':
-        insert_query = "SELECT * FROM car WHERE colour LIKE %s"
-        cur.execute(insert_query, Colour)
-        result = cur.fetchall()
-        if len(result) != 0:
-            record.delete(*record.get_children())
-            for row in result:
-                record.insert('', END, values=row)
-            sqlConnection.commit()
-    if Year != '':
-        insert_query = "SELECT * FROM car WHERE year LIKE %s"
-        cur.execute(insert_query, Year)
-        result = cur.fetchall()
-        if len(result) != 0:
-            record.delete(*record.get_children())
-            for row in result:
-                record.insert('', END, values=row)
-            sqlConnection.commit()
-    if Type != '':
-        insert_query = "SELECT * FROM car WHERE type LIKE %s"
-        cur.execute(insert_query, Type)
+    counter = 0
+    values = []
+    insert_query = "SELECT * FROM car WHERE %s LIKE '%s'"
+
+    if Make != '' or Model != '' or Colour != '' or Year != '' or Type != ' ':
+        if Make != '':
+            values.append("make")
+            values.append(Make)
+            counter += 1
+        if Model != '':
+            values.append("model")
+            values.append(Model)
+            counter += 1
+        if Colour != '':
+            values.append("colour")
+            values.append(Colour)
+            counter += 1
+        if Year != '':
+            values.append("year")
+            values.append(Year)
+            counter += 1
+        if Type != ' ':
+            values.append("type")
+            values.append(Type)
+            counter += 1
+
+        values = tuple(values)
+
+        if counter == 1:
+            sql = (insert_query %values)
+        else:
+            for i in range(0, counter - 1):
+                insert_query += " AND %s LIKE '%s'"
+            sql = (insert_query %values)
+
+        cur.execute(sql)
         result = cur.fetchall()
         if len(result) != 0:
             record.delete(*record.get_children())
@@ -287,6 +284,7 @@ btnExit = Button(RightFrame, font=('arial', 12, 'bold'), text="Exit",
                       bd=8, pady=2, padx=20, width=10, height=3, command=exit)
 btnExit.grid(row=6, column=0, padx=5)
 
+search()
 
 if __name__ == '__main__':
     root.mainloop()
