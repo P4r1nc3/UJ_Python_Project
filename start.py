@@ -52,7 +52,7 @@ def createDataBase(x):
 def createTable(x):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=x, database="carDataBase")
     cursor = sqlConnection.cursor()
-    cursor.execute('CREATE TABLE car (id int(11) NOT NULL auto_increment, make VARCHAR(64), model VARCHAR(64), colour VARCHAR(64), year VARCHAR(64), type VARCHAR(64), PRIMARY KEY (id))')
+    cursor.execute('CREATE TABLE car (id int(11) NOT NULL auto_increment, make VARCHAR(64) NOT NULL, model VARCHAR(64) NOT NULL, colour VARCHAR(64) NOT NULL, year VARCHAR(64) NOT NULL, type VARCHAR(64) NOT NULL, PRIMARY KEY (id))')
     sqlConnection.commit()
     sqlConnection.close()
 
@@ -91,7 +91,7 @@ def removeAllRecords(x):
     sqlConnection.close()
 
 if __name__ == '__main__':
-    password = input("Podaj haslo do profilu root mysql: ")
+    password = "admin12345"
 
     while True:
         print("  Jaka czynnosc chcesz wykonac?")
