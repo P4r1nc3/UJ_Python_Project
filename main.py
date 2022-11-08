@@ -19,6 +19,7 @@ carModel = StringVar()
 carColour = StringVar()
 carYear = StringVar()
 carType = StringVar()
+carMileage = StringVar()
 
 # ========================= Frames =========================
 # Main Frame
@@ -26,7 +27,7 @@ MainFrame = Frame(root, bd=20, width=1000, height=1000, relief=RIDGE, bg='black'
 MainFrame.grid()
 
 # Left Frame
-LeftFrame = Frame(MainFrame, bd=7, relief=RIDGE)
+LeftFrame = Frame(MainFrame, bd=6, relief=RIDGE)
 LeftFrame.pack(side=LEFT)
 
 LeftFrame0 = Frame(LeftFrame, bd=2, relief=RIDGE)
@@ -69,15 +70,23 @@ entryProductionYear = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=
                      textvariable=carYear)
 entryProductionYear.grid(row=3, column=1, sticky=W, padx=50)
 
+# Car Mileage
+lblMileage = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Mileage", bd=8)
+lblMileage.grid(row=4, column=0, sticky=W, padx=50)
+
+entryMileage = Entry(LeftFrame0, font=('arial', 12, 'bold'), bd=8, width=40, justify='left',
+                     textvariable=carMileage)
+entryMileage.grid(row=4, column=1, sticky=W, padx=50)
+
 # Car Body Type
 lblBodyType = Label(LeftFrame0, font=('arial', 12, 'bold'), text="Car Body Type", bd=8)
-lblBodyType.grid(row=4, column=0, sticky=W, padx=50)
+lblBodyType.grid(row=5, column=0, sticky=W, padx=50)
 
 boxBodyType = ttk.Combobox(LeftFrame0, textvariable=carType)
 boxBodyType['values'] = (' ', 'Sedan', 'Coupe', 'Sport Car', 'Station Wagon', 'Hatchback',
                               'Convertible', 'SUV', 'Minivan', 'Pickup Truck', 'Different')
 boxBodyType.current(0)
-boxBodyType.grid(row=4, column=1, sticky=W, padx=50)
+boxBodyType.grid(row=5, column=1, sticky=W, padx=50)
 
 
 # ======================== Commands ========================
@@ -92,6 +101,7 @@ def reset():
     entryCarModel.delete(0, END)
     entryProductionYear.delete(0, END)
     entryCarColour.delete(0, END)
+    entryMileage.delete(0, END)
     boxBodyType.set(" ")
 
 def addNew():
@@ -102,13 +112,14 @@ def addNew():
     Model = carModel.get()
     Colour = carColour.get()
     Year = carYear.get()
+    Mileage = carMileage.get()
     Type = carType.get()
 
-    if Make == "" or Model == "" or Colour == "" or Year == "" or Type == " ":
+    if Make == "" or Model == "" or Colour == "" or Year == "" or Mileage == "" or Type == " ":
         tkinter.messagebox.showinfo("Car Database", "Make sure to enter all values!")
     else:
-        insert_query = "INSERT INTO car (make, model, colour, year, type) VALUES(%s, %s, %s, %s, %s)"
-        values = (Make, Model, Colour, Year, Type)
+        insert_query = "INSERT INTO car (make, model, colour, year, mileage, type) VALUES(%s, %s, %s, %s, %s, %s)"
+        values = (Make, Model, Colour, Year, Mileage, Type)
         cur.execute(insert_query, values)
         sqlConnection.commit()
         incrementReset()
@@ -148,10 +159,10 @@ def delete():
 def incrementReset():
     sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
     cur = sqlConnection.cursor()
-    cur.execute("CREATE TABLE new_car AS SELECT id, make, model, colour, year, type FROM car")
+    cur.execute("CREATE TABLE new_car AS SELECT id, make, model, colour, year, mileage, type FROM car")
     cur.execute("DELETE FROM car")
     cur.execute("ALTER TABLE car AUTO_INCREMENT = 1 ")
-    cur.execute("INSERT INTO car (make, model, colour, year, type) SELECT make, model, colour, year, type FROM new_car ORDER BY id ASC")
+    cur.execute("INSERT INTO car (make, model, colour, year, mileage, type) SELECT make, model, colour, year, mileage, type FROM new_car ORDER BY id ASC")
     cur.execute("DROP TABLE new_car")
     sqlConnection.commit()
     sqlConnection.close()
@@ -167,7 +178,8 @@ def info(event):
         carModel.set(row[2])
         carColour.set(row[3])
         carYear.set(row[4])
-        carType.set(row[5])
+        carMileage.set(row[5])
+        carType.set(row[6])
 
 def update():
     sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
@@ -177,14 +189,15 @@ def update():
     Model = carModel.get()
     Colour = carColour.get()
     Year = carYear.get()
+    Mileage = carMileage.get()
     Type = carType.get()
 
     viewInfo = record.focus()
     learnerData = record.item(viewInfo)
     row = learnerData['values']
 
-    insert_query = "UPDATE car SET make=%s, model=%s, colour=%s, year=%s, type=%s WHERE id=%s"
-    values = (Make, Model, Colour, Year, Type, row[0])
+    insert_query = "UPDATE car SET make=%s, model=%s, colour=%s, year=%s, mileage=%s, type=%s WHERE id=%s"
+    values = (Make, Model, Colour, Year, Mileage, Type, row[0])
     cur.execute(insert_query, values)
 
     sqlConnection.commit()
@@ -200,6 +213,7 @@ def search():
     Model = carModel.get()
     Colour = carColour.get()
     Year = carYear.get()
+    Mileage = carMileage.get()
     Type = carType.get()
 
     counter = 0
@@ -207,7 +221,7 @@ def search():
     insert_query = "SELECT * FROM car WHERE %s LIKE '%s'"
     insert_query_count = "SELECT COUNT(*) FROM car WHERE %s LIKE '%s'"
 
-    if Make != '' or Model != '' or Colour != '' or Year != '' or Type != ' ':
+    if Make != '' or Model != '' or Colour != '' or Year != '' or Mileage != '' or Type != ' ':
         if Make != '':
             values.append("make")
             values.append(Make)
@@ -223,6 +237,10 @@ def search():
         if Year != '':
             values.append("year")
             values.append(Year)
+            counter += 1
+        if Mileage != '':
+            values.append("mileage")
+            values.append(Mileage)
             counter += 1
         if Type != ' ':
             values.append("type")
@@ -329,13 +347,15 @@ def OnDoubleClick(event):
     elif region == "heading" and column == "#5":
         sorting("year", count)
     elif region == "heading" and column == "#6":
+        sorting("mileage", count)
+    elif region == "heading" and column == "#7":
         sorting("type", count)
 
 # ========================= Scrollbar =========================
 scroll_y = Scrollbar(LeftFrame, orient=VERTICAL)
 
-columns = ('id', 'make', 'model', 'colour', 'year', 'type')
-record = ttk.Treeview(LeftFrame, height=14, columns=columns, yscrollcommand=scroll_y.set)
+columns = ('id', 'make', 'model', 'colour', 'year', 'mileage', 'type')
+record = ttk.Treeview(LeftFrame, height=12, columns=columns, yscrollcommand=scroll_y.set)
 scroll_y.pack(side=RIGHT, fill=Y)
 
 record.heading('id', text='ID')
@@ -343,16 +363,18 @@ record.heading('make', text='Make')
 record.heading('model', text='Model')
 record.heading('colour', text='Colour')
 record.heading('year', text='Production Year')
+record.heading('mileage', text='Mileage')
 record.heading('type', text='Body Type')
 
 record['show'] = 'headings'
 
 record.column('id', width=50)
-record.column('make', width=100)
-record.column('model', width=100)
-record.column('colour', width=100)
-record.column('year', width=100)
-record.column('type', width=100)
+record.column('make', width=90)
+record.column('model', width=90)
+record.column('colour', width=90)
+record.column('year', width=90)
+record.column('mileage', width=90)
+record.column('type', width=90)
 
 record.pack(fill=BOTH, expand=1)
 record.bind("<ButtonRelease-1>", info)
