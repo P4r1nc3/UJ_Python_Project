@@ -36,14 +36,14 @@ def generateCar():
     year = random.randint(2000, 2022)
 
     # ===== Mileage =====
-    mileage = random.randint(1000, 200000    )
+    mileage = random.randint(1000, 200000)
 
     # ===== Type =====
     typeList = ['Sedan', 'Coupe', 'Sport Car', 'Station Wagon', 'Hatchback',
             'Convertible', 'SUV', 'Minivan', 'Pickup Truck', 'Different']
     type = random.choice(typeList)
 
-    return make, model, colour, year, type
+    return make, model, colour, year, mileage, type
 
 def createDataBase(x):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=x)
@@ -62,8 +62,8 @@ def createTable(x):
 def insertRecords(x):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=x, database="carDataBase")
     cursor = sqlConnection.cursor()
-    for i in range(0, 1000):
-        cursor.execute('insert into car (make, model, colour, year, type) values' + str(generateCar()))
+    for i in range(0, 10000):
+        cursor.execute('insert into car (make, model, colour, year, mileage, type) values' + str(generateCar()))
     sqlConnection.commit()
     sqlConnection.close()
 
