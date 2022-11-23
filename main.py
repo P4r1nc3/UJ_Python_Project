@@ -5,6 +5,7 @@ from tkinter import ttk
 import pymysql
 import sys
 
+
 # ========================= Enter Your Password for root User =========================
 pswd = "admin12345"
 
@@ -161,7 +162,7 @@ def incrementReset():
     cur = sqlConnection.cursor()
     cur.execute("CREATE TABLE new_car AS SELECT id, make, model, colour, year, mileage, type FROM car")
     cur.execute("DELETE FROM car")
-    cur.execute("ALTER TABLE car AUTO_INCREMENT = 1 ")
+    cur.execute("ALTER TABLE car AUTO_INCREMENT = 1")
     cur.execute("INSERT INTO car (make, model, colour, year, mileage, type) SELECT make, model, colour, year, mileage, type FROM new_car ORDER BY id ASC")
     cur.execute("DROP TABLE new_car")
     sqlConnection.commit()
@@ -271,6 +272,12 @@ def search():
         tkinter.messagebox.showinfo("Car Database", "Found %s records matching the criteria" % amount)
     sqlConnection.close()
 
+def sorting(filter, count):
+    if count % 2 == 1:
+        sortingASC(filter)
+    else:
+        sortingDESC(filter)
+
 def sortingASC(filter):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
     cur = sqlConnection.cursor()
@@ -285,29 +292,6 @@ def sortingASC(filter):
             record.insert('', END, values=row)
         sqlConnection.commit()
     cur.execute(" drop table sorted")
-    sqlConnection.commit()
-    sqlConnection.close()
-
-def sorting(filter, count):
-    if count % 2 == 1:
-        sortingASC(filter)
-    else:
-        sortingDESC(filter)
-
-def sortingASC(filter):
-    sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
-    cur = sqlConnection.cursor()
-
-    cur.execute("CREATE TABLE sorted AS SELECT * FROM car ORDER BY %s ASC" %filter)
-    insert_query = "SELECT * FROM sorted"
-    cur.execute(insert_query)
-    result = cur.fetchall()
-    if len(result) != 0:
-        record.delete(*record.get_children())
-        for row in result:
-            record.insert('', END, values=row)
-        sqlConnection.commit()
-    cur.execute("DROP TABLE sorted")
     sqlConnection.commit()
     sqlConnection.close()
 
