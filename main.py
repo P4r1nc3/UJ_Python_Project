@@ -5,7 +5,6 @@ from tkinter import ttk
 import pymysql
 import sys
 
-
 # ========================= Enter Your Password for root User =========================
 pswd = "admin12345"
 
@@ -282,7 +281,7 @@ def sortingASC(filter):
     sqlConnection = pymysql.connect(host="localhost", user="root", password=pswd, database="carDataBase")
     cur = sqlConnection.cursor()
 
-    cur.execute("create table sorted as select * from car order by %s" %filter)
+    cur.execute("CREATE TABLE sorted AS SELECT * FROM car ORDER BY %s" %filter)
     insert_query = "SELECT * FROM sorted"
     cur.execute(insert_query)
     result = cur.fetchall()
@@ -291,7 +290,7 @@ def sortingASC(filter):
         for row in result:
             record.insert('', END, values=row)
         sqlConnection.commit()
-    cur.execute(" drop table sorted")
+    cur.execute("DROP TABLE sorted")
     sqlConnection.commit()
     sqlConnection.close()
 
